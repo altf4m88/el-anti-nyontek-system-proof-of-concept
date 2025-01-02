@@ -8,6 +8,7 @@
 <body>
     <h1>Online Exam</h1>
     <p>Please stay on this page during the exam. Switching tabs will result in penalties.</p>
+    <button>Mulai</button>
 
     <script>
         let tabSwitchCount = 0;
@@ -19,7 +20,6 @@
             warningSound.preload = 'auto';
             warningSound2 = new Audio('hayoloh.mp3'); // Replace with your sound file
             warningSound2.preload = 'auto';
-
 
             // Enable sound after user interaction
             document.addEventListener('click', () => {
@@ -74,8 +74,12 @@
 
         const endExam = () => {
             alert('Your exam has been terminated due to policy violation.');
+
+            // change whole page content with image nyontek.webp
+            document.body.innerHTML = '<img src="nyontek.webp" alt="Exam Terminated" style="width:50%; height:50%; object-fit:contain;">';
+
             // Redirect to a termination page or submit the exam
-            window.location.href = '/exam-terminated'; // Replace with your desired URL
+            // window.location.href = '/exam-terminated'; // Replace with your desired URL
         };
 
         // Prevent default shortcuts (optional, limited to certain scenarios)
