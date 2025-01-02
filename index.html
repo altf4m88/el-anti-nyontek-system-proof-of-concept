@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Exam</title>
+</head>
+<body>
+    <h1>Online Exam</h1>
+    <p>Please stay on this page during the exam. Switching tabs will result in penalties.</p>
+
+    <script>
+        let tabSwitchCount = 0;
+        let warningSound;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Preload warning sound
+            warningSound = new Audio('warning-sound.mp3'); // Replace with your sound file
+            warningSound.preload = 'auto';
+            warningSound2 = new Audio('hayoloh.mp3'); // Replace with your sound file
+            warningSound2.preload = 'auto';
+
+
+            // Enable sound after user interaction
+            document.addEventListener('click', () => {
+                // warningSound.play().catch(() => {
+                //     console.log('User interaction required for audio playback.');
+                // });
+            }, { once: true });
+
+            // Lock screen orientation (optional, for supported browsers)
+            if (screen.orientation) {
+                screen.orientation.lock('portrait').catch(err => console.error('Screen lock failed:', err));
+            }
+        });
+
+        const playWarningSound = () => {
+            if (warningSound) {
+                warningSound.play().catch(err => console.error('Audio playback error:', err));
+            }
+            // Vibration for mobile
+            if (navigator.vibrate) {
+                navigator.vibrate(500); // Vibrate for 500ms
+            }
+        };
+
+        const playWarningSound2 = () => {
+            if (warningSound) {
+                warningSound2.play().catch(err => console.error('Audio playback error:', err));
+            }
+            // Vibration for mobile
+            if (navigator.vibrate) {
+                navigator.vibrate(500); // Vibrate for 500ms
+            }
+        };
+
+        // Track tab switching or page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                tabSwitchCount++;
+
+                if (tabSwitchCount === 1) {
+                    alert('Warning: You have switched tabs! Stay on the exam page.');
+                    sendViolationToServer(('tab-switch', { tabSwitchCount: tabSwitchCount }));
+                    playWarningSound();
+                } else if (tabSwitchCount === 2) {
+                    playWarningSound2();
+                    sendViolationToServer(('tab-switch', { tabSwitchCount: tabSwitchCount }));
+                    alert('Exam terminated: You switched tabs twice.');
+                    endExam();
+                }
+            }
+        });
+
+        const endExam = () => {
+            alert('Your exam has been terminated due to policy violation.');
+            // Redirect to a termination page or submit the exam
+            window.location.href = '/exam-terminated'; // Replace with your desired URL
+        };
+
+        // Prevent default shortcuts (optional, limited to certain scenarios)
+        document.addEventListener('keydown', (event) => {
+            if (event.altKey || event.ctrlKey || event.metaKey) {
+                event.preventDefault();
+                playWarningSound();
+                alert('Shortcut keys are not allowed during the exam.');
+            }
+        });
+
+        const sendViolationToServer = (eventType, details) => {
+            const payload = {
+                userId: '12345', // Replace with actual user ID
+                examId: 'exam789', // Replace with actual exam ID
+                event: eventType, // Event type: e.g., "tab-switch", "exam-terminated"
+                timestamp: new Date().toISOString(),
+                details: details || null, // Optional details
+            };
+
+            // Send data to server using fetch
+            fetch('/api/log-tab-switch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Failed to log event on server:', response.statusText);
+                } else {
+                    console.log('Event logged successfully:', eventType);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending AJAX request:', error);
+            });
+        };
+    </script>
+</body>
+</html>
